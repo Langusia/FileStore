@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credo.Core.FileStorage", "Credo.Core.FileStorage\Credo.Core.FileStorage.csproj", "{8027F895-A625-4409-BD6F-72A5B50713BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credo.Core.Minio", "Credo.Core.Minio\Credo.Core.Minio.csproj", "{225DEB46-46C2-4DC2-8483-E780BC5E5227}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credo.SomeClient.API", "Credo.SomeClient.API\Credo.SomeClient.API.csproj", "{B2198879-C431-4019-B0A5-F4EBEDD54139}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8027F895-A625-4409-BD6F-72A5B50713BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8027F895-A625-4409-BD6F-72A5B50713BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8027F895-A625-4409-BD6F-72A5B50713BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8027F895-A625-4409-BD6F-72A5B50713BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{225DEB46-46C2-4DC2-8483-E780BC5E5227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{225DEB46-46C2-4DC2-8483-E780BC5E5227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{225DEB46-46C2-4DC2-8483-E780BC5E5227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{225DEB46-46C2-4DC2-8483-E780BC5E5227}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2198879-C431-4019-B0A5-F4EBEDD54139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2198879-C431-4019-B0A5-F4EBEDD54139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2198879-C431-4019-B0A5-F4EBEDD54139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2198879-C431-4019-B0A5-F4EBEDD54139}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
