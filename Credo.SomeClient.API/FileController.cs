@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Credo.Core.FileStorage.Models;
 using Credo.Core.FileStorage.Storage;
+using Credo.SomeClient.API.Dtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,20 +14,16 @@ public class FileStorageController : ControllerBase
         _fileStorage = fileStorage;
     }
 
-    [HttpPost("{channel}/{operation}")]
-    public async Task<IActionResult> Upload(
-        [FromRoute] string channel,
-        [FromRoute] string operation,
-         IFormFile file,
-        CancellationToken cancellationToken)
+    [HttpPost]
+    public async Task<IActionResult> Upload(UploadFileRequest request, CancellationToken cancellationToken)
     {
-        if (file == null || file.Length == 0)
+        if (request.file == null || request.file.Length == 0)
             return BadRequest("File is missing.");
 
-        var client = new Client(channel, operation);
+        var client = new Client(request.Channel, request.Operation);
 
-        await using var stream = file.OpenReadStream();
-        var credoFile = new CredoFile(stream, file.FileName, file.ContentType);
+        await using var stream = request.file.OpenReadStream();
+        var credoFile = new CredoFile(stream, request.file.FileName, request.file.ContentType, new(request.TransitionAfterDays, request.ExpirationAfterDays));
 
         await _fileStorage.Store(credoFile, client, cancellationToken);
 

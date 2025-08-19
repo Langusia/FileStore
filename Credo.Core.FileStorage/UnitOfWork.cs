@@ -11,6 +11,7 @@ public class UnitOfWork : IDisposable
     public IFileMetadataRepository FileMetadataRepository { get; }
     public IBucketMetadataRepository BucketMetadataRepository { get; }
     public IStorageOperationRepository StorageOperationRepository { get; }
+    public IStorageOperationStoringPolicyRepository StorageOperationStoringPolicyRepository { get; }
 
     public UnitOfWork(IDbConnection connection)
     {
@@ -23,6 +24,7 @@ public class UnitOfWork : IDisposable
         FileMetadataRepository = new FileMetadataRepository(_connection, _transaction);
         BucketMetadataRepository = new BucketMetadataRepository(_connection, _transaction);
         StorageOperationRepository = new StorageOperationRepository(_connection, _transaction);
+        StorageOperationStoringPolicyRepository = new StorageOperationStoringPolicyRepository(_connection, _transaction);
     }
 
     public void Commit() => _transaction.Commit();

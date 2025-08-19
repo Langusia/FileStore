@@ -14,6 +14,7 @@ public class BucketMetadataRepository : IBucketMetadataRepository
         _transaction = transaction;
     }
 
+
     public async Task<BucketMetadata> CreateAsync(BucketMetadata bucket)
     {
         var sql = @"INSERT INTO doc.BucketMetadatas (Id, Name, ChannelId, StorageOperationId)
@@ -34,6 +35,12 @@ public class BucketMetadataRepository : IBucketMetadataRepository
         return await _connection.QuerySingleOrDefaultAsync<BucketMetadata>(sql, new { Id = id }, _transaction);
     }
 
+    public async Task<BucketMetadata?> GetByAliasAsync(string alias)
+    {
+        var sql = "SELECT * FROM doc.BucketMetadatas WHERE Name = @alias";
+        return await _connection.QuerySingleOrDefaultAsync<BucketMetadata>(sql, new { Alias = alias }, _transaction);
+    }
+
     public async Task<BucketMetadata> UpdateAsync(BucketMetadata bucket)
     {
         var sql = @"UPDATE doc.BucketMetadatas SET
@@ -50,4 +57,4 @@ public class BucketMetadataRepository : IBucketMetadataRepository
         var sql = "DELETE FROM doc.BucketMetadatas WHERE Id = @Id";
         await _connection.ExecuteAsync(sql, new { Id = id }, _transaction);
     }
-} 
+}

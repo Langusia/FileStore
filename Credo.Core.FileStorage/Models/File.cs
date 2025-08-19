@@ -2,14 +2,36 @@
 
 namespace Credo.Core.FileStorage.Models;
 
-public record CredoFile(Stream stream, string name, string contentType)
+public record CredoFile
 {
-    internal FileToStore ToFileToStore(Channel channel, StorageOperation storageOperation) => new()
+    public CredoFile()
     {
-        BucketName = $"{channel.Alias}/{storageOperation.Alias}",
-        Stream = stream,
-        Name = name,
-        ContentType = contentType,
-        Prefix = null
-    };
+    }
+
+    public CredoFile(Stream Stream, string Name, string ContentType, StoringPolicy? storingPolicy = null)
+    {
+        this.Stream = Stream;
+        this.Name = Name;
+        this.ContentType = ContentType;
+        StoringPolicy = storingPolicy;
+    }
+
+    public Stream Stream { get; init; }
+    public string Name { get; init; }
+    public string ContentType { get; init; }
+    public StoringPolicy? StoringPolicy { get; init; }
+
+    internal FileToStore ToFileToStore(Channel channel, StorageOperation storageOperation, StoringPolicy? defaultPolicy = null)
+    {
+        var s = new FileToStore
+        {
+            BucketName = $"{channel.Alias}--{storageOperation.Alias}",
+            Stream = Stream,
+            Name = Name,
+            ContentType = ContentType,
+            Prefix = null,
+            StoringPolicy = this.StoringPolicy ?? defaultPolicy
+        };
+        return s;
+    }
 }

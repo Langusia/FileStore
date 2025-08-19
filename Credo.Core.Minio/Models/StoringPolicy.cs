@@ -2,6 +2,16 @@
 
 public class StoringPolicy
 {
-    public int? ExpirationAfterDays { get; set; }
+    public StoringPolicy()
+    {
+    }
+
+    public StoringPolicy(int transitionAfterDays, int? expirationAfterDays)
+    {
+        TransitionAfterDays = transitionAfterDays;
+        ExpirationAfterDays = expirationAfterDays;
+    }
+
     public int TransitionAfterDays { get; set; }
+    public int? ExpirationAfterDays { get; set; }
 }

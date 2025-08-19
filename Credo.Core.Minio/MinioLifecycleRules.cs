@@ -9,26 +9,27 @@ public static class MinioLifecycleRules
 {
     internal static LifecycleConfiguration ToLifecycleConfiguration(this StoringPolicy storingPolicy)
     {
-        var configToMerge = new LifecycleConfiguration();
-
+        var configToMerge = new LifecycleConfiguration
+        {
+            Rules = []
+        };
         var transitionDurationDefinition = $"{storingPolicy.TransitionAfterDays}Days";
         var transRuleId = $"transition-{transitionDurationDefinition}";
-        configToMerge.Rules.Add(new()
+        LifecycleRule lcr = new()
         {
             ID = transRuleId,
             Filter = new RuleFilter
             {
-                Tag = new Tagging
-                {
-                    Tags = { new KeyValuePair<string, string>(transRuleId, transitionDurationDefinition) }
-                }
+                Tag = new Tagging(new Dictionary<string, string>() { { transRuleId, transitionDurationDefinition } }, true)
             },
             TransitionObject = new Transition()
             {
                 StorageClass = "COLD-TIER",
                 Days = storingPolicy.TransitionAfterDays
             }
-        });
+        };
+
+        configToMerge.Rules.Add(lcr);
 
         if (storingPolicy.ExpirationAfterDays is not null)
         {
@@ -39,10 +40,7 @@ public static class MinioLifecycleRules
                 ID = expRuleId,
                 Filter = new RuleFilter
                 {
-                    Tag = new Tagging
-                    {
-                        Tags = { new KeyValuePair<string, string>(expRuleId, expirationDurationDefinition) }
-                    }
+                    Tag = new Tagging(new Dictionary<string, string>() { { transRuleId, transitionDurationDefinition } }, true)
                 },
                 Expiration = new Expiration()
                 {
@@ -56,14 +54,10 @@ public static class MinioLifecycleRules
 
     internal static Tagging SelectTags(this LifecycleConfiguration lc)
     {
-        var tagging = new Tagging();
         var tags = lc.Rules.Select(x => x.Filter.Tag).SelectMany(x => x.Tags);
-        foreach (var tag in tags)
-        {
-            tagging.Tags.Add(tag);
-        }
+        var dict = tags.ToDictionary(tag => tag.Key, tag => tag.Value);
 
-        return tagging;
+        return new Tagging(dict, true);
     }
 
     internal static Tagging SelectTags(this StoringPolicy storingPolicy)
@@ -80,7 +74,7 @@ public static class MinioLifecycleRules
     }
 
 
-    public static LifecycleConfiguration SetDefaultLifeCycleConfiguration(this LifecycleConfiguration existingConfig) => new(
+    public static LifecycleConfiguration DefaultLifeCycleConfiguration() => new(
         new List<LifecycleRule>
         {
             new()
@@ -88,10 +82,7 @@ public static class MinioLifecycleRules
                 ID = "default",
                 Filter = new RuleFilter
                 {
-                    Tag = new Tagging
-                    {
-                        Tags = { new KeyValuePair<string, string>("default", "90days") }
-                    }
+                    Tag = new Tagging(new Dictionary<string, string>() { { "default", "90days" } }, true)
                 },
                 TransitionObject = new Transition()
                 {
@@ -102,14 +93,14 @@ public static class MinioLifecycleRules
         });
 
     [SuppressMessage("ReSharper", "SimplifyLinqExpressionUseAll")]
-    public static LifecycleConfiguration MergeLifeCycleConfiguration(this LifecycleConfiguration? configToMerge, StoringPolicy? storingPolicy)
+    public static LifecycleConfiguration MergeLifeCycleConfiguration(LifecycleConfiguration? configToMerge, StoringPolicy? storingPolicy)
     {
-        configToMerge ??= new LifecycleConfiguration();
         if (storingPolicy is null)
         {
-             configToMerge.SetDefaultLifeCycleConfiguration();
-            return configToMerge;
+            return DefaultLifeCycleConfiguration();
         }
+
+        configToMerge ??= new LifecycleConfiguration();
 
         var transitionDurationDefinition = $"{storingPolicy.TransitionAfterDays}Days";
         var transRuleId = $"transition-{transitionDurationDefinition}";

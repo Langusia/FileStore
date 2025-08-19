@@ -6,7 +6,8 @@ public interface IBucketMetadataRepository
 {
     Task<IEnumerable<BucketMetadata>> GetAllAsync();
     Task<BucketMetadata> GetByIdAsync(Guid id);
+    Task<BucketMetadata?> GetByAliasAsync(string alias);
     Task<BucketMetadata> CreateAsync(BucketMetadata bucket);
     Task<BucketMetadata> UpdateAsync(BucketMetadata bucket);
     Task DeleteAsync(Guid id);
-} 
+}

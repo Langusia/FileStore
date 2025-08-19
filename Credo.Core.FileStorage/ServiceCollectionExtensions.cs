@@ -4,6 +4,7 @@ using Credo.Core.FileStorage.Storage;
 using Credo.Core.Minio.DI;
 using Credo.Core.Minio.Storage;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 
 namespace Credo.Core.FileStorage;
 
@@ -18,8 +19,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFileStorage, FileStorage1>(sp =>
         {
             var minioStorage = sp.GetRequiredService<IMinioStorage>();
+            var logger = sp.GetRequiredService<ILogger<FileStorage1>>();
             Func<UnitOfWork> uowFactory = () => sp.GetRequiredService<UnitOfWork>();
-            return new FileStorage1(minioStorage, uowFactory);
+            return new FileStorage1(minioStorage, uowFactory, logger);
         });
 
         return services;

@@ -18,8 +18,13 @@ public static class StorageBuilderExtensions
             if (string.IsNullOrWhiteSpace(configuration.SecretKey))
                 throw new ArgumentException("SecretKey is required.", nameof(configuration.SecretKey));
 
+            var handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback =
+                (message, cert, chain, errors) => true;
+
             configureClient
-                .WithEndpoint(configuration.Endpoint, configuration.Port)
+                .WithEndpoint(configuration.Endpoint)
+                .WithHttpClient(new HttpClient(handler))
                 .WithCredentials(configuration.AccessKey, configuration.SecretKey)
                 .WithSSL()
                 .SetTraceOn();

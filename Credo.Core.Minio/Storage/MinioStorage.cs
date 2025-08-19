@@ -6,12 +6,12 @@ namespace Credo.Core.Minio.Storage;
 
 public class MinioStorage(IMinioClient client) : IMinioStorage
 {
-    public async Task StoreFile(FileToStore fileToStore, CancellationToken cancellationToken, StoringPolicy? storingPolicy = null)
+    public async Task StoreFile(FileToStore fileToStore, CancellationToken cancellationToken)
     {
-        var lc = storingPolicy?.ToLifecycleConfiguration();
+        var lc = fileToStore.StoringPolicy?.ToLifecycleConfiguration();
         var tags = lc?.SelectTags();
 
-        await PutBucketAsync(fileToStore.BucketName, cancellationToken, storingPolicy);
+        await PutBucketAsync(fileToStore.BucketName, cancellationToken, fileToStore.StoringPolicy);
         var putObjectArgs = new PutObjectArgs()
             .WithBucket(fileToStore.BucketName)
             .WithObject(fileToStore.Name)
@@ -24,7 +24,7 @@ public class MinioStorage(IMinioClient client) : IMinioStorage
     }
 
 
-    public async Task<string[]> PutBucketAsync(string bucketName, CancellationToken token, StoringPolicy? storingPolicy = null)
+    public async Task PutBucketAsync(string bucketName, CancellationToken token, StoringPolicy? storingPolicy = null)
     {
         var bucketExists = await client.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName), token);
         if (!bucketExists)
@@ -34,14 +34,13 @@ public class MinioStorage(IMinioClient client) : IMinioStorage
         }
 
         var existingRules = await client.GetBucketLifecycleAsync(new GetBucketLifecycleArgs().WithBucket(bucketName), token);
-        var lc = existingRules.MergeLifeCycleConfiguration(storingPolicy);
+
+        var lc = MinioLifecycleRules.MergeLifeCycleConfiguration(existingRules, storingPolicy);
 
         await client.SetBucketLifecycleAsync(new SetBucketLifecycleArgs()
                 .WithLifecycleConfiguration(lc)
                 .WithBucket(bucketName)
             , token);
-
-        return lc.Rules.Select(x => x.ID).ToArray();
     }
 
     public async Task<byte[]> GetFile(string bucketName, string objectName)

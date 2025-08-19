@@ -3,6 +3,7 @@ using Credo.Core.FileStorage;
 using Credo.Core.Minio.Storage;
 using System.Data.SqlClient;
 using System.Data;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,11 +17,17 @@ builder.Services.AddControllers();
 builder.Services.AddFileStorage(builder.Configuration.GetConnectionString("DefaultConnection"),
     new CredoMinioStorageConfiguration
     {
-        Endpoint = "10.195.103.254",
+        Endpoint = "s3.minio.credo.ge",
         AccessKey = "minioadmin",
-        SecretKey = "Aa123456$",
-        Port = 9000
+        SecretKey = "securepassword123!"
     });
+
+// Register UnitOfWork factory for controllers
+builder.Services.AddScoped<Func<UnitOfWork>>(serviceProvider => 
+{
+    var connection = serviceProvider.GetRequiredService<IDbConnection>();
+    return () => new UnitOfWork(connection);
+});
 
 var app = builder.Build();
 
