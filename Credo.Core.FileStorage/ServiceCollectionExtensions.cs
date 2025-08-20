@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System.Data;
 using Credo.Core.FileStorage.Storage;
+using Credo.Core.FileStorage.V1;
 using Credo.Core.Minio.DI;
 using Credo.Core.Minio.Storage;
 using Microsoft.Data.SqlClient;
@@ -13,7 +14,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddFileStorage(this IServiceCollection services, string connectionString, CredoMinioStorageConfiguration configuration)
     {
         services.AddMinioStorage(configuration);
-
+        services.AddFileStorage1(connectionString, configuration);
         services.AddScoped<IDbConnection>(sp => new SqlConnection(connectionString));
         services.AddScoped<UnitOfWork>();
         services.AddScoped<IFileStorage, FileStorage1>(sp =>

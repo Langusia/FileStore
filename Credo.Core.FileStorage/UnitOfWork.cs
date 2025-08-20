@@ -1,6 +1,8 @@
 using System.Data;
 using Credo.Core.FileStorage.Repositories;
 
+namespace Credo.Core.FileStorage;
+
 public class UnitOfWork : IDisposable
 {
     private readonly IDbConnection _connection;
@@ -35,4 +37,4 @@ public class UnitOfWork : IDisposable
         _transaction?.Dispose();
         _connection?.Dispose();
     }
-} 
+}

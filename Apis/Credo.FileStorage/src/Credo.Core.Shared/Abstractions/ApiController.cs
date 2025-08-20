@@ -1,5 +1,4 @@
-﻿using System.Net;
-using Credo.Core.Shared.Library;
+﻿using Credo.Core.Shared.Library;
 using Credo.Core.Shared.Messages;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

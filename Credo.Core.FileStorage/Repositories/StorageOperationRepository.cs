@@ -1,7 +1,8 @@
 using System.Data;
-using Dapper;
 using Credo.Core.FileStorage.Models;
-using Credo.Core.FileStorage.Repositories;
+using Dapper;
+
+namespace Credo.Core.FileStorage.Repositories;
 
 public class StorageOperationRepository : IStorageOperationRepository
 {
@@ -55,4 +56,4 @@ public class StorageOperationRepository : IStorageOperationRepository
         var sql = "SELECT * FROM doc.StorageOperations WHERE Alias = @Alias";
         return await _connection.QuerySingleOrDefaultAsync<StorageOperation>(sql, new { Alias = alias }, _transaction);
     }
-} 
+}

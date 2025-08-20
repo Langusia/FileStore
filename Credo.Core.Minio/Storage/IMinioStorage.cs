@@ -1,5 +1,4 @@
 ﻿using Credo.Core.Minio.Models;
-using System.Text.RegularExpressions;
 
 namespace Credo.Core.Minio.Storage;
 

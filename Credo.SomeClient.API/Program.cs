@@ -1,9 +1,6 @@
 using Credo.Core.Minio.DI;
 using Credo.Core.FileStorage;
-using Credo.Core.Minio.Storage;
-using System.Data.SqlClient;
 using System.Data;
-using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 

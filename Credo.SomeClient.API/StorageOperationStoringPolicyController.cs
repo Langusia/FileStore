@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Credo.Core.FileStorage.Models;
-using Credo.Core.FileStorage.Repositories;
 using Credo.SomeClient.API.Dtos;
-using System.Data;
+using Credo.Core.FileStorage;
 
 namespace Credo.SomeClient.API;
 

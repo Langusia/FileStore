@@ -1,7 +1,8 @@
 using System.Data;
-using Dapper;
 using Credo.Core.FileStorage.Models;
-using Credo.Core.FileStorage.Repositories;
+using Dapper;
+
+namespace Credo.Core.FileStorage.Repositories;
 
 public class ChannelRepository : IChannelRepository
 {
@@ -56,4 +57,4 @@ public class ChannelRepository : IChannelRepository
         var sql = "SELECT * FROM doc.Channels WHERE Alias = @Alias";
         return await _connection.QuerySingleOrDefaultAsync<Channel>(sql, new { Alias = alias }, _transaction);
     }
-} 
+}

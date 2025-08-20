@@ -1,8 +1,6 @@
 ﻿using Credo.FileStorage.Domain.Interfaces;
 using Credo.FileStorage.Domain.Settings;
 using Credo.FileStorage.Persistence;
-using Credo.Core.FileStorage;
-using Credo.Core.Minio.DI;
 
 namespace Credo.FileStorage.Api.Configuration;
 

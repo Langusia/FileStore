@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Credo.Core.FileStorage.Models;
 using Credo.Core.FileStorage.Storage;
+using Credo.Core.FileStorage.V1.DB.Models.Upload;
+using Credo.Core.FileStorage.V1.Storage;
 using Credo.SomeClient.API.Dtos;
 
 [ApiController]
@@ -8,24 +10,46 @@ using Credo.SomeClient.API.Dtos;
 public class FileStorageController : ControllerBase
 {
     private readonly IFileStorage _fileStorage;
+    private readonly IObjectStorage _os;
 
-    public FileStorageController(IFileStorage fileStorage)
+    public FileStorageController(IFileStorage fileStorage, IObjectStorage os)
     {
         _fileStorage = fileStorage;
+        _os = os;
     }
 
+//  [HttpPost]
+//  public async Task<IActionResult> Upload(UploadFileRequest request, CancellationToken cancellationToken)
+//  {
+//      if (request.file == null || request.file.Length == 0)
+//          return BadRequest("File is missing.");
+
+//      var client = new Client(request.Channel, request.Operation);
+
+//      await using var stream = request.file.OpenReadStream();
+//      var credoFile = new CredoFile(stream, request.file.FileName, request.file.ContentType, new(request.TransitionAfterDays, request.ExpirationAfterDays));
+
+//      await _fileStorage.Store(credoFile, client, cancellationToken);
+
+//      return Ok("File uploaded successfully.");
+//  }
+
     [HttpPost]
-    public async Task<IActionResult> Upload(UploadFileRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload1(UploadFileRequest request, CancellationToken cancellationToken)
     {
+        var s = await _os.Upload(new AliasArgs("BackOffice", "ArchiveDoc"),
+            UploadFile.FromStream(request.file.OpenReadStream(), request.file.FileName, request.file.ContentType),
+            ct: cancellationToken);
+
         if (request.file == null || request.file.Length == 0)
             return BadRequest("File is missing.");
 
         var client = new Client(request.Channel, request.Operation);
 
-        await using var stream = request.file.OpenReadStream();
-        var credoFile = new CredoFile(stream, request.file.FileName, request.file.ContentType, new(request.TransitionAfterDays, request.ExpirationAfterDays));
-
-        await _fileStorage.Store(credoFile, client, cancellationToken);
+//        await using var stream = request.file.OpenReadStream();
+//        var credoFile = new CredoFile(stream, request.file.FileName, request.file.ContentType, new(request.TransitionAfterDays, request.ExpirationAfterDays));
+//
+        //await _fileStorage.Store(credoFile, client, cancellationToken);
 
         return Ok("File uploaded successfully.");
     }

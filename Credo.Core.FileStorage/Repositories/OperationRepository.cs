@@ -1,7 +1,8 @@
 using System.Data;
-using Dapper;
 using Credo.Core.FileStorage.Models;
-using Credo.Core.FileStorage.Repositories;
+using Dapper;
+
+namespace Credo.Core.FileStorage.Repositories;
 
 public class OperationRepository : IOperationRepository
 {
@@ -56,4 +57,4 @@ public class OperationRepository : IOperationRepository
         var sql = "SELECT * FROM doc.Operations WHERE Alias = @Alias";
         return await _connection.QuerySingleOrDefaultAsync<Operation>(sql, new { Alias = alias }, _transaction);
     }
-} 
+}
