@@ -13,6 +13,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IObjectStorage, MinioObjectStorage>();
         services.AddScoped<IDocumentsRepository, DocumentsRepository>();
         services.AddScoped<IChannelOperationBucketRepository, ChannelOperationBucketRepository>();
+        services.AddScoped<IChannelsAdminRepository, ChannelsAdminRepository>();
+        services.AddScoped<IOperationsAdminRepository, OperationsAdminRepository>();
+        services.AddScoped<IChannelOperationBindingsRepository, ChannelOperationBindingsRepository>();
         services.AddSingleton<IDbConnectionFactory>(new SqlConnectionFactory(connectionString));
         services.AddMinioStorage(configuration);
         return services;

@@ -13,7 +13,7 @@ public class TodoCommandRepository(
     IOptions<ConnectionStrings> connectionStrings
 ) : ITodoCommandRepository
 {
-    private readonly string _connectionString = connectionStrings.Value.Todo;
+    private readonly string _connectionString = connectionStrings.Value.DocumentDb;
 
     public async Task<Result<Guid>> Create(Todo todo, CancellationToken cancellationToken)
     {

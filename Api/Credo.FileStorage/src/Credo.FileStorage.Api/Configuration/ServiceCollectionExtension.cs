@@ -19,6 +19,9 @@ internal static class ServiceCollectionExtension
     {
         services.AddScoped<ITodoQueryRepository, TodoQueryRepository>();
         services.AddScoped<ITodoCommandRepository, TodoCommandRepository>();
+        services.AddScoped<IChannelsAdminRepository, ChannelsAdminRepository>();
+        services.AddScoped<IOperationsAdminRepository, OperationsAdminRepository>();
+        services.AddScoped<IChannelOperationBucketsRepository, ChannelOperationBucketsRepository>();
     }
 
     public static void AddServices(this IServiceCollection services)

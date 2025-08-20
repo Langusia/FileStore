@@ -2,5 +2,5 @@
 
 public class ConnectionStrings
 {
-    public string Todo { get; set; } = null!;
+    public string DocumentDb { get; set; } = null!;
 }
