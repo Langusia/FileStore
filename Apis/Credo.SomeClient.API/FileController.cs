@@ -1,4 +1,4 @@
-﻿using Credo.Core.FileStorage.DB.Models.Upload;
+﻿using Credo.Core.FileStorage.Models.Upload;
 using Credo.Core.FileStorage.Storage;
 using Credo.SomeClient.API.Dtos;
 using Microsoft.AspNetCore.Mvc;

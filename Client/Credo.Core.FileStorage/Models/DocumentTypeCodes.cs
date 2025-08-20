@@ -1,4 +1,4 @@
-﻿namespace Credo.Core.FileStorage.DB.Models;
+﻿namespace Credo.Core.FileStorage.Models;
 
 public static class DocumentTypeCodes
 {

@@ -1,7 +1,7 @@
-﻿using Credo.Core.FileStorage.DB.Models;
-using Credo.Core.FileStorage.DB.Models.Upload;
+﻿using Credo.Core.FileStorage.DB.Entities;
 using Credo.Core.FileStorage.DB.Repositories;
-using Credo.Core.FileStorage.Entities;
+using Credo.Core.FileStorage.Models;
+using Credo.Core.FileStorage.Models.Upload;
 using Credo.Core.FileStorage.Validation;
 using Minio;
 using Minio.DataModel.Args;

@@ -1,6 +1,6 @@
-﻿namespace Credo.Core.FileStorage.Entities;
+﻿namespace Credo.Core.FileStorage.DB.Entities;
 
-public sealed class Operation
+public sealed class Channel
 {
     public Guid Id { get; set; }
     public string Alias { get; set; } = null!;

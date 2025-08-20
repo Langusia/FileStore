@@ -1,4 +1,4 @@
-using Credo.Core.FileStorage.Entities;
+using Credo.Core.FileStorage.DB.Entities;
 using Dapper;
 
 namespace Credo.Core.FileStorage.DB.Repositories;

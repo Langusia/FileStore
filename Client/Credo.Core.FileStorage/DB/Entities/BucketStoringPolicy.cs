@@ -1,4 +1,4 @@
-﻿namespace Credo.Core.FileStorage.Entities;
+﻿namespace Credo.Core.FileStorage.DB.Entities;
 
 public sealed class BucketStoringPolicy
 {

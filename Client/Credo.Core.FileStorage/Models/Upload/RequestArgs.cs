@@ -1,4 +1,4 @@
-﻿namespace Credo.Core.FileStorage.DB.Models.Upload;
+﻿namespace Credo.Core.FileStorage.Models.Upload;
 
 public interface IUploadRouteArgs
 {

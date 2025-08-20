@@ -1,4 +1,4 @@
-﻿namespace Credo.Core.FileStorage.DB.Models.Upload;
+﻿namespace Credo.Core.FileStorage.Models.Upload;
 
 public sealed record UploadOptions(string? LogicalName = null, string? ObjectKeyPrefix = null);
 

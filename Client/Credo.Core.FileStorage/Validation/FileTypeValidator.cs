@@ -1,4 +1,4 @@
-﻿using Credo.Core.FileStorage.DB.Models;
+﻿using Credo.Core.FileStorage.Models;
 
 namespace Credo.Core.FileStorage.Validation;
 

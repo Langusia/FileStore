@@ -1,4 +1,4 @@
-﻿using Credo.Core.FileStorage.DB.Models.Upload;
+﻿using Credo.Core.FileStorage.Models.Upload;
 
 namespace Credo.Core.FileStorage.Storage;
 

@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using Credo.Core.FileStorage.Entities;
+using Credo.Core.FileStorage.DB.Entities;
 using Credo.Core.FileStorage.Exceptions;
 using Dapper;
 using Microsoft.Data.SqlClient;

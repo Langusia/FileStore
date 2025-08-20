@@ -1,5 +1,6 @@
-﻿using Credo.Core.FileStorage.DB.Models;
-using Credo.Core.FileStorage.Entities;
+﻿using Credo.Core.FileStorage.DB.Entities;
+using Credo.Core.FileStorage.Models;
+using Credo.Core.FileStorage.Models.Upload;
 
 namespace Credo.Core.FileStorage.DB.Repositories;
 
