@@ -14,8 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Credo.Core.FileStorage\Credo.Core.FileStorage.csproj" />
-      <ProjectReference Include="..\Credo.Core.Minio\Credo.Core.Minio.csproj" />
+      <ProjectReference Include="..\Client\Credo.Core.FileStorage\Credo.Core.FileStorage.csproj" />
     </ItemGroup>
 
 </Project>

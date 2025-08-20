@@ -19,13 +19,6 @@ builder.Services.AddFileStorage(builder.Configuration.GetConnectionString("Defau
         SecretKey = "securepassword123!"
     });
 
-// Register UnitOfWork factory for controllers
-builder.Services.AddScoped<Func<UnitOfWork>>(serviceProvider => 
-{
-    var connection = serviceProvider.GetRequiredService<IDbConnection>();
-    return () => new UnitOfWork(connection);
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
