@@ -29,7 +29,7 @@ public sealed class AdminController : ApiController
         _buckets = buckets;
     }
 
-    // Channels
+    // Channels 
     [HttpGet("channels")]
     public async Task<ActionResult<ApiServiceResponse<IEnumerable<ChannelAdmin>>>> GetChannels(CancellationToken ct)
         => await Result.Create(true)
@@ -139,5 +139,6 @@ public sealed class AdminController : ApiController
                 HandleFailure<string>
             );
 }
+
 
 
