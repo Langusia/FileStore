@@ -7,17 +7,37 @@ namespace Credo.FileStorage.Api.Controllers;
 [Route("api/file-storage")]
 public class FileStorageController(IObjectStorage os) : ControllerBase
 {
-    [HttpPost("file")]
-    [Consumes("multipart/form-data")]
-    public async Task<IActionResult> Upload([FromForm] UploadFileRequest request, CancellationToken cancellationToken)
+    [HttpPost]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(string))]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UploadResult))]
+    public async Task<ActionResult<UploadResult>> Upload([FromForm] UploadFileRequest request, CancellationToken cancellationToken)
     {
-        var s = await os.Upload(new AliasArgs(request.Channel, request.Operation),
+        var result = await os.Upload(new AliasArgs(request.Channel, request.Operation),
             UploadFile.FromStream(request.file.OpenReadStream(), request.file.FileName, request.file.ContentType),
             ct: cancellationToken);
 
         if (request.file.Length == 0)
             return BadRequest("File is missing.");
 
-        return Ok("File uploaded successfully.");
+        return Ok(result);
+    }
+
+    [HttpGet("{bucket}/{**key}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+    public async Task<IActionResult> GetByBucketKey(string bucket, string key, CancellationToken ct)
+    {
+        var obj = await os.OpenReadAsync(bucket, key, ct);
+        return File(obj.Stream, obj.ContentType, obj.FileName);
+    }
+
+    [HttpGet("{documentId}")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FileStreamResult))]
+    public async Task<IActionResult> GetByBucketKey(Guid documentId, CancellationToken ct)
+    {
+        var obj = await os.OpenReadAsync(documentId, ct);
+        return File(obj.Stream, obj.ContentType, obj.FileName);
     }
 }

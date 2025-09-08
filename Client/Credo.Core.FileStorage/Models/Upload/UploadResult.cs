@@ -7,6 +7,7 @@ public sealed record UploadResult(
     string Bucket,
     string ObjectKey,
     string Name,
+    string Path,
     long Size,
     short Type,
     DateTime UploadedAtUtc

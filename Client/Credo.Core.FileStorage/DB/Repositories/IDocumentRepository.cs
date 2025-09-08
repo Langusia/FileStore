@@ -13,4 +13,5 @@ public interface IDocumentsRepository
 
     // (optional) convenience reads you may want later
     Task<Document?> TryGetAsync(Guid id, CancellationToken ct = default);
+    Task<Document?> TryGetAsync(string bucket, string objKey, CancellationToken ct = default);
 }

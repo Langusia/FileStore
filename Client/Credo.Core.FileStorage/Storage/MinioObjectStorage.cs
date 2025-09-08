@@ -1,6 +1,6 @@
 ﻿using Credo.Core.FileStorage.DB.Entities;
 using Credo.Core.FileStorage.DB.Repositories;
-using Credo.Core.FileStorage.Models;
+using Credo.Core.FileStorage.Models.Download;
 using Credo.Core.FileStorage.Models.Upload;
 using Credo.Core.FileStorage.Validation;
 using Minio;
@@ -11,6 +11,76 @@ namespace Credo.Core.FileStorage.Storage;
 public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBucketRepository cobRepo, IDocumentsRepository docs, IFileTypeInspector inspector)
     : IObjectStorage
 {
+    public async Task<StorageObject> OpenReadAsync(Guid documentId, CancellationToken ct = default)
+    {
+        var doc = await docs.TryGetAsync(documentId, ct)
+                  ?? throw new FileNotFoundException($"Document {documentId} not found");
+
+        return await OpenReadCoreAsync(doc.ChannelOperationBucket.Bucket.Name,
+            doc.Key, doc.Size, doc.Type, doc.Name, ct);
+    }
+
+    public async Task<StorageObject> OpenReadAsync(string bucket, string objectKey, CancellationToken ct = default)
+    {
+        var doc = await docs.TryGetAsync(bucket, objectKey, ct)
+                  ?? throw new FileNotFoundException($"Document {bucket}/{objectKey} not found");
+
+        return await OpenReadCoreAsync(bucket, objectKey, doc.Size, doc.Type, doc.Name, ct);
+    }
+
+    // public async Task<StorageObject> OpenReadAsync(string bucket, string objectKey, CancellationToken ct = default)
+    // {
+    //     var ms = new MemoryStream();
+    //     var args = new GetObjectArgs()
+    //         .WithBucket(bucket)
+    //         .WithObject(objectKey)
+    //         .WithCallbackStream(src => src.CopyTo(ms));
+    //
+    //     await minio.GetObjectAsync(args, ct).ConfigureAwait(false);
+    //     ms.Position = 0;
+    //
+    //     var ext = Path.GetExtension(objectKey).TrimStart('.').ToLowerInvariant();
+    //     var contentType = ext switch
+    //     {
+    //         "pdf" => "application/pdf",
+    //         "png" => "image/png",
+    //         "jpg" or "jpeg" => "image/jpeg",
+    //         "csv" => "text/csv",
+    //         "zip" => "application/zip",
+    //         "xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    //         _ => "application/octet-stream"
+    //     };
+    //
+    //     return new StorageObject(contentType, Path.GetFileName(objectKey), ms);
+    // }
+
+    private async Task<StorageObject> OpenReadCoreAsync(
+        string bucket,
+        string objectKey,
+        long size,
+        short typeCode,
+        string fileName,
+        CancellationToken ct)
+    {
+        // Pre-size buffer if size is known and < 2GB
+        var ms = (size > 0 && size <= int.MaxValue)
+            ? new MemoryStream(capacity: (int)size)
+            : new MemoryStream();
+
+        var args = new GetObjectArgs()
+            .WithBucket(bucket.ToLowerInvariant())
+            .WithObject(objectKey)
+            .WithCallbackStream(src => src.CopyTo(ms));
+
+        await minio.GetObjectAsync(args, ct).ConfigureAwait(false);
+        ms.Position = 0;
+
+        return new StorageObject(MimeMap.ToContentType(typeCode),
+            string.IsNullOrWhiteSpace(fileName)
+                ? Path.GetFileName(objectKey)
+                : fileName, ms);
+    }
+
     public async Task<UploadResult> Upload(
         IUploadRouteArgs route,
         UploadFile file,
@@ -78,7 +148,8 @@ public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBuck
                 new DocumentCreate(
                     ChannelOperationBucketId: routeId,
                     Name: docName,
-                    Address: objKey,
+                    Address: $"{bucketName}/{objKey}",
+                    objKey,
                     Size: size,
                     Type: typeCode),
                 ct);
@@ -100,7 +171,7 @@ public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBuck
             throw;
         }
 
-        return new UploadResult(docId, bucketName, objKey, docName, size, typeCode, nowUtc);
+        return new UploadResult(docId, bucketName, objKey, docName, $"{bucketName}/{objKey}", size, typeCode, nowUtc);
     }
 
 
