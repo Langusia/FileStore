@@ -1,3 +1,5 @@
+using Credo.Core.FileStorage;
+using Credo.Core.Minio.DI;
 using Credo.FileStorage.Api.Configuration;
 using Credo.Core.Shared.Middleware;
 using Credo.FileStorage.Api.Swagger;
@@ -28,6 +30,13 @@ builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Credo.FileStorage.Api API V1", Version = "v1" });
     c.OperationFilter<HeaderFilter>();
 });
+builder.Services.AddFileStorage(builder.Configuration.GetConnectionString("DocumentDb"),
+    new CredoMinioStorageConfiguration
+    {
+        Endpoint = "s3.minio.credo.ge",
+        AccessKey = "minioadmin",
+        SecretKey = "securepassword123!"
+    });
 
 var app = builder.Build();
 

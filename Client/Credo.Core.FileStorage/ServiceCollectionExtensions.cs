@@ -1,6 +1,8 @@
 ﻿using Credo.Core.FileStorage.DB;
 using Credo.Core.FileStorage.DB.Repositories;
 using Credo.Core.FileStorage.Storage;
+using Credo.Core.FileStorage.Validation;
+using Credo.Core.FileStorage.Validation.MimeProbes;
 using Credo.Core.Minio.DI;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +19,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOperationsAdminRepository, OperationsAdminRepository>();
         services.AddScoped<IChannelOperationBindingsRepository, ChannelOperationBindingsRepository>();
         services.AddSingleton<IDbConnectionFactory>(new SqlConnectionFactory(connectionString));
+        services.AddSingleton<IFileTypeProbe, MagicSignatureProbe>(); // 1st: binaries
+        services.AddSingleton<IFileTypeProbe, CsvProbe>(); // 2nd: CSV text
+        services.AddSingleton<IFileTypeInspector, CompositeFileTypeInspector>();
+
         services.AddMinioStorage(configuration);
         return services;
     }

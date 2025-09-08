@@ -94,21 +94,21 @@ public sealed class ChannelOperationBucketRepository(IDbConnectionFactory dbf) :
     cob.BucketId      AS BucketId,
 
     -- channel (second object)
-    c.Id              AS ChannelId,   -- split marker
+    c.Id              AS Split_ChannelId,   -- split marker
     c.Id              AS Id,
     c.Alias           AS Alias,
     c.ExternalAlias   AS ExternalAlias,
     c.ExternalId      AS ExternalId,
 
     -- operation (third object)
-    o.Id              AS OperationId, -- split marker
+    o.Id              AS Split_OperationId, -- split marker
     o.Id              AS Id,
     o.Alias           AS Alias,
     o.ExternalAlias   AS ExternalAlias,
     o.ExternalId      AS ExternalId,
 
     -- bucket (fourth object)
-    b.Id              AS BucketId,    -- split marker
+    b.Id              AS Split_BucketId,    -- split marker
     b.Id              AS Id,
     b.Name            AS Name
 FROM doc.ChannelOperationBuckets cob
@@ -118,6 +118,7 @@ JOIN doc.Buckets    b ON b.Id = cob.BucketId";
 
     private static async Task<ChannelOperationBucket?> MapSingleAsync(SqlConnection con, string sql, object param)
     {
+        //splitOn: "Split_ChannelId,Split_OperationId,Split_BucketId"
         var rows = await con.QueryAsync<ChannelOperationBucket, Channel, Operation, Bucket, ChannelOperationBucket>(
             sql,
             (cob, ch, op, b) =>
@@ -127,8 +128,7 @@ JOIN doc.Buckets    b ON b.Id = cob.BucketId";
                 cob.Bucket = b;
                 return cob;
             },
-            param,
-            splitOn: "ChannelId,OperationId,BucketId");
+            param);
 
         return rows.FirstOrDefault();
     }

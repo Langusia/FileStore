@@ -1,35 +1,35 @@
-﻿namespace Credo.Core.FileStorage.Validation;
-
-public static class AllowedFileTypes
+﻿public static class DocumentTypeCodes
 {
-    // Canonical MIME values we accept (extend as needed)
-    public static readonly HashSet<string> AllowedMimes = new(StringComparer.OrdinalIgnoreCase)
+    public const short Csv = 120;
+    public const short Pdf = 101;
+    public const short Png = 201;
+    public const short Jpeg = 202;
+    public const short Zip = 301;
+
+    public const short Xlsx = 311;
+}
+
+public static class MimeMap
+{
+    public static string ToContentType(short typeCode) => typeCode switch
     {
-        "application/pdf",
-        "text/csv",
-        "application/vnd.ms-excel",                                         // .xls (legacy, OLE2)
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",// .xlsx
-        "image/jpeg",
-        "image/png",
-        // optional:
-        // "image/tiff",
-        // "application/json",
-        // "application/x-ofx", "application/vnd.intu.qfx"
+        DocumentTypeCodes.Csv => "text/csv",
+        DocumentTypeCodes.Pdf => "application/pdf",
+        DocumentTypeCodes.Png => "image/png",
+        DocumentTypeCodes.Jpeg => "image/jpeg",
+        DocumentTypeCodes.Zip => "application/zip",
+        DocumentTypeCodes.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        _ => "application/octet-stream"
     };
 
-    // Helpful for fallback when sniff is inconclusive
-    public static readonly Dictionary<string,string> ExtToMime = new(StringComparer.OrdinalIgnoreCase)
+    public static string? PreferredExtensionForMime(string mime) => mime switch
     {
-        [".pdf"]  = "application/pdf",
-        [".csv"]  = "text/csv",
-        [".xls"]  = "application/vnd.ms-excel",
-        [".xlsx"] = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        [".jpeg"] = "image/jpeg",
-        [".jpg"]  = "image/jpeg",
-        [".png"]  = "image/png",
-        // [".tif"] = "image/tiff", [".tiff"] = "image/tiff",
-        // [".ofx"] = "application/x-ofx", [".qfx"] = "application/vnd.intu.qfx",
-        // [".json"]= "application/json",
-        // [".txt"] = "text/plain",
+        "text/csv" => "csv",
+        "application/pdf" => "pdf",
+        "image/png" => "png",
+        "image/jpeg" => "jpg",
+        "application/zip" => "zip",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => "xlsx",
+        _ => null
     };
 }

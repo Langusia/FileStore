@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\..\Client\Credo.Core.FileStorage\Credo.Core.FileStorage.csproj" />
         <ProjectReference Include="..\Credo.FileStorage.Persistence\Credo.FileStorage.Persistence.csproj"/>
     </ItemGroup>
 

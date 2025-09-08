@@ -8,16 +8,9 @@ using Minio.DataModel.Args;
 
 namespace Credo.Core.FileStorage.Storage;
 
-public sealed class MinioObjectStorage : IObjectStorage
+public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBucketRepository cobRepo, IDocumentsRepository docs, IFileTypeInspector inspector)
+    : IObjectStorage
 {
-    private readonly IMinioClient _minio;
-    private readonly IChannelOperationBucketRepository _cobRepo;
-    private readonly IDocumentsRepository _docs;
-
-    public MinioObjectStorage(IMinioClient minio, IChannelOperationBucketRepository cobRepo, IDocumentsRepository docs)
-        => (_minio, _cobRepo, _docs) = (minio, cobRepo, docs);
-
-    // --- New, preferred API ---
     public async Task<UploadResult> Upload(
         IUploadRouteArgs route,
         UploadFile file,
@@ -37,34 +30,34 @@ public sealed class MinioObjectStorage : IObjectStorage
         var safeFileName = Path.GetFileName(file.FileName);
         var (seekable, size, isTemp) = await EnsureSeekableAsync(file.Content, ct);
 
+        // 3) Detect type (binary via Mime-Detective; CSV via CsvHelper probe)
         short typeCode;
         try
         {
-            // Strict allow-list validation (pdf/csv/xls/xlsx/jpg/png etc.)
-            var tv = await FileTypeValidator.ValidateOrThrowAsync(seekable, safeFileName, file.ContentType, ct);
-            typeCode = tv.TypeCode;
+            typeCode = await inspector.DetectOrThrowAsync(seekable, safeFileName, file.ContentType, ct);
         }
         finally
         {
             if (seekable.CanSeek) seekable.Position = 0;
         }
 
-        // 3) Preferred MIME + extension based on authoritative type code
-        var preferredMime = DocumentTypeCodes.ToContentType(typeCode);
+        // 4) Preferred MIME + extension from your map
+        var preferredMime = MimeMap.ToContentType(typeCode);
         var nowUtc = DateTime.UtcNow;
-        var ext = PreferredExtensionForMime(preferredMime)
+        var ext = MimeMap.PreferredExtensionForMime(preferredMime)
                   ?? Path.GetExtension(safeFileName).TrimStart('.').ToLowerInvariant();
+
         var objKey = BuildObjectKey(options?.ObjectKeyPrefix, ext, nowUtc);
         var docName = string.IsNullOrWhiteSpace(options?.LogicalName) ? safeFileName : options!.LogicalName!;
 
-        // 4) Ensure bucket exists after validation
+        // 5) Ensure bucket exists (after validation)
         await EnsureBucketAsync(bucketName, ct);
 
-        // 5) Upload first; compensate S3 on DB failure
+        // 6) Upload to MinIO first; if DB fails we compensate by deleting the object
         try
         {
-            await _minio.PutObjectAsync(new PutObjectArgs()
-                .WithBucket(bucketName.ToLower())
+            await minio.PutObjectAsync(new PutObjectArgs()
+                .WithBucket(bucketName.ToLowerInvariant())
                 .WithObject(objKey)
                 .WithStreamData(seekable)
                 .WithObjectSize(size)
@@ -77,11 +70,11 @@ public sealed class MinioObjectStorage : IObjectStorage
             if (file.DisposeStream) await file.DisposeAsync();
         }
 
-        // 6) DB row
+        // 7) Write DB row; compensate S3 on DB failure
         Guid docId;
         try
         {
-            docId = await _docs.InsertAsync(
+            docId = await docs.InsertAsync(
                 new DocumentCreate(
                     ChannelOperationBucketId: routeId,
                     Name: docName,
@@ -94,10 +87,14 @@ public sealed class MinioObjectStorage : IObjectStorage
         {
             try
             {
-                await _minio.RemoveObjectAsync(new RemoveObjectArgs().WithBucket(bucketName).WithObject(objKey), ct);
+                await minio.RemoveObjectAsync(
+                    new RemoveObjectArgs()
+                        .WithBucket(bucketName.ToLowerInvariant())
+                        .WithObject(objKey), ct);
             }
             catch
             {
+                // swallow compensation failure; original exception will bubble
             }
 
             throw;
@@ -105,6 +102,7 @@ public sealed class MinioObjectStorage : IObjectStorage
 
         return new UploadResult(docId, bucketName, objKey, docName, size, typeCode, nowUtc);
     }
+
 
     // --- Back-compat shim: keep old signature pointing to the new API ---
     public Task<UploadResult> Upload(
@@ -120,19 +118,19 @@ public sealed class MinioObjectStorage : IObjectStorage
     private Task<ChannelOperationBucket> ResolveRouteAsync(IUploadRouteArgs route, CancellationToken ct) =>
         route switch
         {
-            AliasArgs a => _cobRepo.GetByAliasesAsync(a.ChannelAlias, a.OperationAlias, ct),
-            ExternalAliasArgs ea => _cobRepo.GetByExternalAliasesAsync(ea.ChannelExternalAlias, ea.OperationExternalAlias, ct),
-            ExternalIdArgs ei => _cobRepo.GetByExternalIdsAsync(ei.ChannelExternalId, ei.OperationExternalId, ct),
-            ChOpBucketArgs id => _cobRepo.GetByIdAsync(id.ChannelOperationBucketId, ct),
-            BucketNameArgs bn => _cobRepo.GetOrCreateDefaultForBucketAsync(bn.BucketName, ct),
+            AliasArgs a => cobRepo.GetByAliasesAsync(a.ChannelAlias, a.OperationAlias, ct),
+            ExternalAliasArgs ea => cobRepo.GetByExternalAliasesAsync(ea.ChannelExternalAlias, ea.OperationExternalAlias, ct),
+            ExternalIdArgs ei => cobRepo.GetByExternalIdsAsync(ei.ChannelExternalId, ei.OperationExternalId, ct),
+            ChOpBucketArgs id => cobRepo.GetByIdAsync(id.ChannelOperationBucketId, ct),
+            BucketNameArgs bn => cobRepo.GetOrCreateDefaultForBucketAsync(bn.BucketName, ct),
             _ => throw new ArgumentOutOfRangeException(nameof(route))
         };
 
     // ---------- helpers ----------
     private async Task EnsureBucketAsync(string bucket, CancellationToken ct)
     {
-        var exists = await _minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket.ToLower()), ct);
-        if (!exists) await _minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket.ToLower()), ct);
+        var exists = await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket.ToLower()), ct);
+        if (!exists) await minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket.ToLower()), ct);
     }
 
     private static string BuildObjectKey(string? prefix, string ext, DateTime nowUtc)
