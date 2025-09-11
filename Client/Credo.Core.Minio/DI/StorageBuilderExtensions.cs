@@ -26,7 +26,7 @@ public static class StorageBuilderExtensions
                 .WithEndpoint(configuration.Endpoint)
                 .WithHttpClient(new HttpClient(handler))
                 .WithCredentials(configuration.AccessKey, configuration.SecretKey)
-                .WithSSL()
+                .WithSSL(false)
                 .SetTraceOn();
         });
     }
