@@ -38,6 +38,9 @@ stages:
         Environment: TEST1
         AgentPool: CDPools-TEST
         AgentName: TEST1BACK1
+        EnableFileTransform: true
+        TransformFiles: |
+          appsettings.json
 ############################################################
 - stage: TEST1BACK2
   displayName: TEST1BACK2
@@ -55,3 +58,7 @@ stages:
         Environment: TEST1
         AgentPool: CDPools-TEST
         AgentName: TEST1BACK2
+        EnableFileTransform: true
+        TransformFiles: |
+          appsettings.json
+######################################################
