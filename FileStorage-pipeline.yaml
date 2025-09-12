@@ -45,7 +45,7 @@ stages:
   condition: |
     or(
       eq(variables['Build.Reason'], 'Manual'),
-      and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test'))
+      and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test1'))
     )
   jobs:                
     - template: Template/CD/WEB.yaml@templates
