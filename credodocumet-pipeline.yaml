@@ -1,0 +1,57 @@
+trigger:
+  branches:
+    include:
+      - test1
+  paths:
+    include:
+      - /**
+resources:
+  repositories:
+  - repository: self
+    type: git
+  - repository: templates
+    type: git
+    name: Devops/CI-CD
+stages:
+- stage: Build
+  displayName: Build stage
+  pool: 
+    name: AzureAgent-PROD
+  jobs:
+  - template: Template/CI/WEB.yaml@templates
+    parameters:
+        pathToProjects: '**/Api/Credo.FileStorage/src/Credo.FileStorage.Api/Credo.FileStorage.Api.csproj'
+############################################################
+- stage: TEST1BACK1
+  displayName: TEST1BACK1
+  dependsOn: Build
+  condition: |
+    or(
+      eq(variables['Build.Reason'], 'Manual'),
+      and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test1'))
+    )
+  jobs:                
+    - template: Template/CD/WEB.yaml@templates
+      parameters:
+        AppName: 'FileStorageTest1.credo.ge'
+        AppRoot: 'C:\WEB'
+        Environment: TEST1
+        AgentPool: CDPools-TEST
+        AgentName: TEST1BACK1
+############################################################
+- stage: TEST1BACK2
+  displayName: TEST1BACK2
+  dependsOn: Build
+  condition: |
+    or(
+      eq(variables['Build.Reason'], 'Manual'),
+      and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/test'))
+    )
+  jobs:                
+    - template: Template/CD/WEB.yaml@templates
+      parameters:
+        AppName: 'FileStorageTest1.credo.ge'
+        AppRoot: 'C:\WEB'
+        Environment: TEST1
+        AgentPool: CDPools-TEST
+        AgentName: TEST1BACK2
