@@ -33,7 +33,7 @@ stages:
   jobs:                
     - template: Template/CD/WEB.yaml@templates
       parameters:
-        AppName: 'FileStorageTest1.credo.ge'
+        AppName: 'FileStorageApiTest1.credo.ge'
         AppRoot: 'C:\WEB'
         Environment: TEST1
         AgentPool: CDPools-TEST
@@ -50,7 +50,7 @@ stages:
   jobs:                
     - template: Template/CD/WEB.yaml@templates
       parameters:
-        AppName: 'FileStorageTest1.credo.ge'
+        AppName: 'FileStorageApiTest1.credo.ge'
         AppRoot: 'C:\WEB'
         Environment: TEST1
         AgentPool: CDPools-TEST
