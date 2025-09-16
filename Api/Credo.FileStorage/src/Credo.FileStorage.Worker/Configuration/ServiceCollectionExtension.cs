@@ -1,6 +1,7 @@
 ﻿using Credo.FileStorage.Domain.Interfaces;
 using Credo.FileStorage.Domain.Settings;
 using Credo.FileStorage.Persistence;
+using Credo.FileStorage.Worker.LegacyFetcher;
 
 namespace Credo.FileStorage.Worker.Configuration;
 
@@ -19,6 +20,7 @@ internal static class ServiceCollectionExtension
     {
         services.AddScoped<ITodoQueryRepository, TodoQueryRepository>();
         services.AddScoped<ITodoCommandRepository, TodoCommandRepository>();
+        services.AddScoped<ILegacyRepository, LegacyRepository>();
     }
 
     public static void AddServices(this IServiceCollection services)

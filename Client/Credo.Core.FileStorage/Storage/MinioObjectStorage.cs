@@ -185,6 +185,26 @@ public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBuck
         CancellationToken ct = default)
         => Upload(route, UploadFile.FromStream(content, fileName, contentType, declaredLength: null, disposeStream: false), options, ct);
 
+    // --- New interface methods for MigrationRunner ---
+    public async Task EnsureBucketAsync(string bucketName, CancellationToken ct = default)
+    {
+        var exists = await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucketName.ToLowerInvariant()), ct);
+        if (!exists) 
+        {
+            await minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucketName.ToLowerInvariant()), ct);
+        }
+    }
+
+    public async Task PutAsync(string bucketName, string objectKey, Stream data, long size, string contentType, CancellationToken ct = default)
+    {
+        await minio.PutObjectAsync(new PutObjectArgs()
+            .WithBucket(bucketName.ToLowerInvariant())
+            .WithObject(objectKey)
+            .WithStreamData(data)
+            .WithObjectSize(size)
+            .WithContentType(contentType), ct);
+    }
+
     // ---------- route resolution via repo ----------
     private Task<ChannelOperationBucket> ResolveRouteAsync(IUploadRouteArgs route, CancellationToken ct) =>
         route switch
@@ -198,11 +218,6 @@ public sealed class MinioObjectStorage(IMinioClient minio, IChannelOperationBuck
         };
 
     // ---------- helpers ----------
-    private async Task EnsureBucketAsync(string bucket, CancellationToken ct)
-    {
-        var exists = await minio.BucketExistsAsync(new BucketExistsArgs().WithBucket(bucket.ToLower()), ct);
-        if (!exists) await minio.MakeBucketAsync(new MakeBucketArgs().WithBucket(bucket.ToLower()), ct);
-    }
 
     private static string BuildObjectKey(string? prefix, string ext, DateTime nowUtc)
     {
