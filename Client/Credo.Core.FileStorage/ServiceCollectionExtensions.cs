@@ -19,8 +19,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IOperationsAdminRepository, OperationsAdminRepository>();
         services.AddScoped<IChannelOperationBindingsRepository, ChannelOperationBindingsRepository>();
         services.AddSingleton<IDbConnectionFactory>(new SqlConnectionFactory(connectionString));
-        services.AddSingleton<IFileTypeProbe, MagicSignatureProbe>(); // 1st: binaries
-        services.AddSingleton<IFileTypeProbe, CsvProbe>(); // 2nd: CSV text
+        services.AddSingleton<IFileTypeProbe, MagicSignatureProbe>();
+        services.AddSingleton<IFileTypeProbe, CsvProbe>();
+        services.AddSingleton<IFileTypeProbe, ExcelProbe>();
         services.AddSingleton<IFileTypeInspector, CompositeFileTypeInspector>();
 
         services.AddMinioStorage(configuration);
