@@ -13,7 +13,7 @@ public class Worker(
         await JobService.HandleJob(
             async () =>
             {
-                logger.LogInformation($"Service started at ${DateTime.Now}");
+                logger.LogInformation("Service started at {DateTime}", DateTime.Now);
                 logger.LogInformation("Service ended");
             },
             stoppingToken

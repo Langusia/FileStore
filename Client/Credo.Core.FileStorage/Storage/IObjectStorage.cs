@@ -13,4 +13,7 @@ public interface IObjectStorage
         UploadFile file,
         UploadOptions? options = null,
         CancellationToken ct = default);
+
+    Task EnsureBucketAsync(string bucketName, CancellationToken ct = default);
+    Task PutAsync(string bucketName, string objectKey, Stream data, long size, string contentType, CancellationToken ct = default);
 }

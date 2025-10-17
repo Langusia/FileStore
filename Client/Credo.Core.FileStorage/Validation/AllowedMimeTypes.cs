@@ -6,6 +6,7 @@
     public const short Jpeg = 202;
     public const short Zip = 301;
 
+    public const short Xls = 310;
     public const short Xlsx = 311;
 }
 
@@ -18,6 +19,7 @@ public static class MimeMap
         DocumentTypeCodes.Png => "image/png",
         DocumentTypeCodes.Jpeg => "image/jpeg",
         DocumentTypeCodes.Zip => "application/zip",
+        DocumentTypeCodes.Xls => "application/vnd.ms-excel",
         DocumentTypeCodes.Xlsx => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         _ => "application/octet-stream"
     };
@@ -29,6 +31,7 @@ public static class MimeMap
         "image/png" => "png",
         "image/jpeg" => "jpg",
         "application/zip" => "zip",
+        "application/vnd.ms-excel" => "xls",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" => "xlsx",
         _ => null
     };
