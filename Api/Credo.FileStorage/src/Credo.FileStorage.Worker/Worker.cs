@@ -17,6 +17,6 @@ public class Worker(
                 logger.LogInformation("Service ended");
             },
             stoppingToken
-        );
+        ); 
     }
 }

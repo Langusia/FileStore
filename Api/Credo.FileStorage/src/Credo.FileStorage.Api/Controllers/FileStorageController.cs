@@ -13,7 +13,7 @@ public class FileStorageController(IObjectStorage os) : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UploadResult))]
     public async Task<ActionResult<UploadResult>> Upload([FromForm] UploadFileRequest request, CancellationToken cancellationToken)
     {
-        var result = await os.Upload(new AliasArgs(request.Channel, request.Operation),
+        var result = await os.UploadAsync(new AliasArgs(request.Channel, request.Operation),
             UploadFile.FromStream(request.file.OpenReadStream(), request.file.FileName, request.file.ContentType),
             ct: cancellationToken);
 
