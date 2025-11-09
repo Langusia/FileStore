@@ -1,10 +1,12 @@
 using Amazon.S3;
+using Amazon.Runtime;
 using FileStore.Storage.Brokers;
 using FileStore.Storage.Data;
 using FileStore.Storage.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Amazon;
 
 namespace FileStore.Storage.Extensions;
 
@@ -15,6 +17,7 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Adds FileStore services to the dependency injection container.
+    /// Automatically configures S3 client from configuration or environment variables.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <param name="configuration">Configuration containing connection strings and S3 settings.</param>
@@ -30,9 +33,37 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<FileStoreDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-        // Add S3 client
-        services.AddDefaultAWSOptions(configuration.GetAWSOptions());
-        services.AddAWSService<IAmazonS3>();
+        // Add S3 client with automatic configuration
+        services.AddSingleton<IAmazonS3>(sp =>
+        {
+            var config = new AmazonS3Config
+            {
+                RegionEndpoint = RegionEndpoint.GetBySystemName(
+                    configuration["AWS:Region"] ?? "us-east-1")
+            };
+
+            // For S3-compatible services (MinIO, DigitalOcean Spaces, etc.)
+            var serviceUrl = configuration["AWS:ServiceURL"];
+            if (!string.IsNullOrEmpty(serviceUrl))
+            {
+                config.ServiceURL = serviceUrl;
+                config.ForcePathStyle = true; // Required for MinIO
+            }
+
+            // Try to get credentials from configuration first, then fall back to environment/IAM
+            var accessKey = configuration["AWS:AccessKeyId"];
+            var secretKey = configuration["AWS:SecretAccessKey"];
+
+            if (!string.IsNullOrEmpty(accessKey) && !string.IsNullOrEmpty(secretKey))
+            {
+                // Use explicit credentials from configuration
+                var credentials = new BasicAWSCredentials(accessKey, secretKey);
+                return new AmazonS3Client(credentials, config);
+            }
+
+            // Fall back to default credential chain (environment variables, IAM role, etc.)
+            return new AmazonS3Client(config);
+        });
 
         // Add FileStore services
         services.AddScoped<IObjectStorageBroker, S3ObjectStorageBroker>(sp =>
