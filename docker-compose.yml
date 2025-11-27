@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: filestore-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourPassword123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+      - ./database:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q "SELECT 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  filestore-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: filestore-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:80
+    ports:
+      - "5000:80"
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+
+volumes:
+  sqlserver-data:
