@@ -1,14 +1,63 @@
+using System.Reflection;
 using FileStore.Core.Enums;
 using FileStore.Core.Interfaces;
 using FileStore.Infrastructure.Backends;
 using FileStore.Infrastructure.Repositories;
 using FileStore.Infrastructure.Services;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "FileStore API",
+        Description = "S3-like internal object storage service with pluggable backends",
+        Contact = new OpenApiContact
+        {
+            Name = "FileStore Team",
+            Email = "filestore@company.com"
+        },
+        License = new OpenApiLicense
+        {
+            Name = "Internal Use Only"
+        }
+    });
+
+    // Enable XML comments for better documentation
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    // Add examples and schemas
+    options.EnableAnnotations();
+
+    // Add custom operation IDs for better client generation
+    options.CustomOperationIds(apiDesc =>
+    {
+        return apiDesc.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null;
+    });
+
+    // Add server information
+    options.AddServer(new OpenApiServer
+    {
+        Url = "http://localhost:5000",
+        Description = "Development Server"
+    });
+
+    options.AddServer(new OpenApiServer
+    {
+        Url = "https://filestore.company.com",
+        Description = "Production Server"
+    });
+});
 
 var storageBackend = builder.Configuration.GetValue<BackendType>("Storage:Backend");
 
@@ -61,16 +110,37 @@ builder.Services.AddHostedService<TieringBackgroundService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Enable Swagger in all environments (can be restricted with authentication in production)
+app.UseSwagger(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.RouteTemplate = "api-docs/{documentName}/swagger.json";
+});
+
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/api-docs/v1/swagger.json", "FileStore API v1");
+    options.RoutePrefix = "swagger";
+    options.DocumentTitle = "FileStore API Documentation";
+    options.DefaultModelsExpandDepth(2);
+    options.DefaultModelRendering(Swashbuckle.AspNetCore.SwaggerUI.ModelRendering.Example);
+    options.DisplayRequestDuration();
+    options.EnableDeepLinking();
+    options.EnableFilter();
+    options.ShowExtensions();
+});
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }))
+    .WithName("HealthCheck")
+    .WithTags("Health")
+    .Produces<object>(StatusCodes.Status200OK)
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Health Check",
+        Description = "Returns the health status of the API service"
+    });
 
 app.Run();
